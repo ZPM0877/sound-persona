@@ -41,9 +41,9 @@ with st.expander("📊 4つの分析軸と全16タイプ（クリックで開く
    | 軸 | 説明 | イメージ |
     |---|---|---|
     | **L**(Lyric) vs **S**(Sound) | 歌詞 ↔ 音 | 歌詞重視か、音の気持ちよさ重視か |
-    | **E**(Emotional) vs **T**(Technical) | 感性 ↔ 技術 |
-    | **M**(Mainstream) vs **U**(Underground) | 王道 ↔ 個性 |
-    | **D**(Dark) vs **B**(Bright) | 陰 ↔ 陽 |
+    | **E**(Emotional) vs **T**(Technical) | 感性 ↔ 技術 | エモさか、テクニックか |
+    | **M**(Mainstream) vs **U**(Underground) | 王道 ↔ 個性 |メジャーな曲か、マイナーな曲か |
+    | **D**(Dark) vs **B**(Bright) | 陰 ↔ 陽 | 暗い曲か、明るい曲か |
     
     例：**LEMD** = 歌詞重視・感情的・王道・陰
     """)
