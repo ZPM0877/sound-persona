@@ -38,10 +38,10 @@ st.markdown("あなたの「人生の3曲」から、隠された人格と魂の
 with st.expander("📊 4つの分析軸と全16タイプ（クリックで開く）"):
     st.markdown("""
     ### 🔍 4つの分析軸
-   | 軸 | 説明 |
+   | 軸 | 説明 | イメージ |
     |---|---|
-    | **L**(Lyric) vs **S**(Sound) | 歌詞重視 ↔ サウンド重視 |
-    | **E**(Emotional) vs **T**(Technical) | 感情的 ↔ 技術的 |
+    | **L**(Lyric) vs **S**(Sound) | 歌詞 ↔ 音 | 歌詞重視か、音の気持ちよさ重視か |
+    | **E**(Emotional) vs **T**(Technical) | 感性 ↔ 技術 |
     | **M**(Mainstream) vs **U**(Underground) | 王道 ↔ 個性 |
     | **D**(Dark) vs **B**(Bright) | 陰 ↔ 陽 |
     
