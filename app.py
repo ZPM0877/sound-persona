@@ -2,16 +2,12 @@ import streamlit as st
 import google.generativeai as genai
 import re
 import os
-import urllib.parse  # Twitterシェア用に必要
+import urllib.parse
 
 # ==========================================
-# ⚙️ 設定エリア（ここだけ書き換えてください）
+# ⚙️ 設定エリア
 # ==========================================
-
-# ★重要★
-# アプリを一度「Run」して、右上の「新しいタブで開く」を押したときのURLをここに貼ってください。
-# (例: "https://sound-persona-username.replit.app")
-# これがないと、Twitterからアプリに戻ってこれません！
+# ★重要：ここにあなたのアプリURLを貼ってください
 YOUR_APP_URL = "https://あなたのアプリのURL.replit.app"
 
 # ==========================================
@@ -23,77 +19,47 @@ st.set_page_config(
     layout="centered"
 )
 
-# カスタムCSS（見た目を整える）
+# スマホでも見やすくするカスタムCSS
 st.markdown("""
 <style>
     .stTextInput > label {font-size:105%; font-weight:bold; color:#4a4a4a;}
-    .stTextArea > label {font-size:105%; font-weight:bold; color:#4a4a4a;}
-    .reportview-container {background: #f0f2f6;}
     .big-font {font-size:20px !important;}
+    .reportview-container {background: #fcfcfc;}
 </style>
 """, unsafe_allow_html=True)
 
-# タイトル
 st.title("🎧 Sound Persona")
 st.caption("Music Personality Analysis AI / 音楽性格診断")
 st.markdown("あなたの**「人生の3曲」**から、隠された人格と魂の色を分析します。")
 
 # ==========================================
-# 📘 辞書・説明エリア
+# 📘 わかりやすい説明エリア
 # ==========================================
-with st.expander("📊 分析軸とタイプ一覧を見る"):
+with st.expander("📊 4つの分析軸について（クリックで開く）"):
     st.markdown("""
-    ### 4つの分析軸
-    | 軸 | 説明 | 日本語イメージ |
-    |---|---|---|
-    | **L** (Lyric) vs **S** (Sound) | 歌詞 ↔ 音響 | 言葉の力 ↔ 音の響き |
-    | **E** (Emotional) vs **T** (Technical) | 感情 ↔ 技術 | エモさ・衝動 ↔ 構成・テク |
-    | **M** (Mainstream) vs **U** (Underground) | 王道 ↔ 個性 | 時代の寵児 ↔ 孤高のカリスマ |
-    | **D** (Dark) vs **B** (Bright) | 内省 ↔ 発散 | 夜・憂い ↔ 光・祝祭 |
+    あなたの好みを**「対立する2つの要素」**で分析します。
+    
+    | 記号 | 分析軸 | イメージ |
+    |:---:|:---|:---|
+    | **L** vs **S** | **言葉** ↔ **響き** | 歌詞重視か、音の気持ちよさ重視か |
+    | **E** vs **T** | **直感** ↔ **技巧** | エモさ・衝動か、構成・テクニックか |
+    | **M** vs **U** | **王道** ↔ **個性** | みんなが知る曲か、知る人ぞ知る曲か |
+    | **D** vs **B** | **内省** ↔ **発散** | 一人で浸りたいか、みんなで盛り上がりたいか |
     """)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        **🖊️ 歌詞重視 (L)**
-        * **LEMD** : 感傷的な詩人
-        * **LEMB** : 希望の語り部
-        * **LEUD** : 孤独な哲学者
-        * **LEUB** : 孤高の吟遊詩人
-        * **LTMD** : 社会を憂う代弁者
-        * **LTMB** : 王道のヒットメーカー
-        * **LTUD** : 前衛的な言葉の魔術師
-        * **LTUB** : 知性派の表現者
-        """)
-    with col2:
-        st.markdown("""
-        **🎹 サウンド重視 (S)**
-        * **SEMD** : 感情を彩る音の画家
-        * **SEMB** : 旋律を愛する夢想家
-        * **SEUD** : 静寂と響きの探求者
-        * **SEUB** : 癒やしの音使い
-        * **STMD** : 鼓動を刻むリズム職人
-        * **STMB** : 熱狂の支配者
-        * **STUD** : 未踏の音を求む実験者
-        * **STUB** : 技巧を極めし達人
-        """)
 
 # ==========================================
 # 🤖 API設定
 # ==========================================
 try:
-    # Replit Secrets から取得
     api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        # ローカル実行用（Streamlit Cloudなど）
         api_key = st.secrets.get("GOOGLE_API_KEY")
     
     if not api_key:
-        st.error("⚠️ APIキーが見つかりません。Replitの'Secrets'に'GOOGLE_API_KEY'を設定してください。")
+        st.error("⚠️ APIキーが見つかりません。ReplitのSecretsを設定してください。")
         st.stop()
 
     genai.configure(api_key=api_key)
-    # モデル設定（Flash推奨、だめならPro）
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
         model.generate_content("test")
@@ -106,14 +72,14 @@ except Exception as e:
 
 
 # ==========================================
-# 📝 入力フォーム
+# 📝 シンプルになった入力フォーム
 # ==========================================
 with st.form("music_form"):
     st.markdown("### 💿 Step 1: 人生の3曲")
     
     col1, col2 = st.columns([1.5, 1])
-    with col1: s1_name = st.text_input("1曲目: タイトル", placeholder="例: Creep", key="s1n")
-    with col2: s1_artist = st.text_input("アーティスト", placeholder="Radiohead", key="s1a")
+    with col1: s1_name = st.text_input("1曲目: タイトル", placeholder="例: Pretender", key="s1n")
+    with col2: s1_artist = st.text_input("アーティスト", placeholder="Official髭男dism", key="s1a")
     
     col3, col4 = st.columns([1.5, 1])
     with col3: s2_name = st.text_input("2曲目: タイトル", key="s2n")
@@ -126,22 +92,23 @@ with st.form("music_form"):
     st.markdown("---")
     st.markdown("### 🔍 Step 2: 音楽の価値観")
     
+    # ★ここを簡潔でわかりやすく変更しました★
     q_element = st.text_input(
         "Q1. 音楽で一番重視するのは？",
-        placeholder="例: 歌詞の言葉選び、メロディの哀愁、ベースの重低音...",
-        help="歌詞、メロディ、リズム、世界観、演奏技術など"
+        placeholder="例: 歌詞、メロディ、声、リズム、世界観",
+        help="直感で「これだ」と思うもの"
     )
 
     q_situation = st.text_input(
         "Q2. どんな時に聴きたくなりますか？",
-        placeholder="例: 深夜のドライブ、失恋した時、通勤中...",
-        help="具体的なシチュエーション"
+        placeholder="例: 通勤中、寝る前、失恋した時、テンション上げたい時",
+        help="具体的なシーン"
     )
 
     q_value = st.text_input(
         "Q3. あなたにとって「音楽」とは？",
-        placeholder="例: 逃避場所、エネルギー源、酸素...",
-        help="直感で答えてください"
+        placeholder="例: 救い、エネルギー、酸素、ガソリン、タイムマシン",
+        help="一言で表すと？"
     )
 
     submitted = st.form_submit_button("Sound Persona を解析する", use_container_width=True)
@@ -154,9 +121,8 @@ if submitted:
     if not (s1_name and q_value):
         st.warning("⚠️ 精度を高めるため、少なくとも「1曲目」と「音楽とは」は入力してください。")
     else:
-        with st.spinner('🎧 波形を解析中... 深層心理にダイブしています...'):
+        with st.spinner('🎧 解析中... あなたのプレイリストから深層心理を読み解いています...'):
             
-            # こだわりの最強プロンプト
             prompt = f"""
             あなたは音楽心理診断AI「Sound Persona」です。
             以下のデータからユーザーを分析し、指定のフォーマットで出力してください。
@@ -172,10 +138,10 @@ if submitted:
             【分析ロジックと用語定義】
             以下の4軸で判定し、必ず指定の日本語名称を使用すること。
 
-            1. **L** (Lyric/言葉) vs **S** (Sound/音響)
-            2. **E** (Emotional/感情) vs **T** (Technical/技巧)
-            3. **M** (Mainstream/王道) vs **U** (Underground/個性)
-            4. **D** (Dark/内省) vs **B** (Bright/発散)
+            1. **L** (Lyric) vs **S** (Sound) -> 言葉 vs 響き
+            2. **E** (Emotional) vs **T** (Technical) -> 直感 vs 技巧
+            3. **M** (Mainstream) vs **U** (Underground) -> 王道 vs 個性
+            4. **D** (Dark) vs **B** (Bright) -> 内省 vs 発散
 
             [タイプ名リスト]
             LEMD:感傷的な詩人 / LEMB:希望の語り部 / LEUD:孤独な哲学者 / LEUB:孤高の吟遊詩人
@@ -205,14 +171,13 @@ if submitted:
             """
 
             try:
-                # AI実行
                 response = model.generate_content(prompt)
                 
                 # 結果表示
                 st.success("Analysis Complete.")
                 st.markdown(response.text)
                 
-                # --- 演出：カラーカード表示 ---
+                # カラーカード表示
                 color_match = re.search(r'#(?:[0-9a-fA-F]{3}){1,2}', response.text)
                 if color_match:
                     hex_color = color_match.group(0)
@@ -223,18 +188,15 @@ if submitted:
                     </div>
                     """, unsafe_allow_html=True)
 
-                # --- Twitterシェア機能（修正版）---
-                # 1. 結果を抜き出す
+                # Twitterシェア機能
                 type_match = re.search(r"Type:\s*\*\*([A-Z]{4})\*\*", response.text)
                 title_match = re.search(r"『\s*(.*?)\s*』", response.text)
                 color_match_text = re.search(r"カラー名:\s*(.*)", response.text)
 
                 res_type = type_match.group(1) if type_match else "分析完了"
                 res_title = title_match.group(1) if title_match else ""
-                # カラー名はMarkdownの*などを除去して綺麗にする
                 res_color = color_match_text.group(1).replace("*","").strip() if color_match_text else ""
 
-                # 2. シェア用テキスト作成
                 share_text = f"""【Sound Persona 音楽診断】
 私のタイプ：{res_type}
 『 {res_title} 』
@@ -243,11 +205,8 @@ if submitted:
 私にとって音楽とは「{q_value}」である。
 #SoundPersona"""
 
-                # 3. URLエンコード（日本語対応）
                 share_text_encoded = urllib.parse.quote(share_text)
                 share_url_encoded = urllib.parse.quote(YOUR_APP_URL)
-
-                # 4. リンク生成
                 tweet_url = f"https://twitter.com/intent/tweet?text={share_text_encoded}&url={share_url_encoded}"
 
                 st.link_button("🐦 結果をX(Twitter)でポストする", tweet_url)
