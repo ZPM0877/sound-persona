@@ -29,7 +29,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🎧 Sound Persona")
-st.caption("Music Personality Analysis AI / 音楽性格診断")
+st.caption("Music Personality Analysis AI / AI音楽性格診断")
 st.markdown("あなたの**「人生の3曲」**から、隠された人格と魂の色を分析します。")
 
 # ==========================================
