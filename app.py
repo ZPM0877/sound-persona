@@ -24,7 +24,7 @@ st.markdown("""
 
 # 3. タイトル表示
 st.title("🎧 Sound Persona")
-st.caption("Music Personality Analysis AI / 音楽性格診断")
+st.caption("Music Personality Analysis AI / AI音楽性格診断")
 st.write("あなたの「人生の3曲」から、隠された人格と魂の色を分析します。")
 
 with st.expander("📊 分析軸について"):
