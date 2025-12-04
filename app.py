@@ -7,9 +7,8 @@ import urllib.parse
 # ==========================================
 # ⚙️ 設定エリア
 # ==========================================
-# ★重要：ここに「Streamlit Cloudで発行されたURL」を後で貼ってください
-# (例: "https://sound-persona-xxxxx.streamlit.app")
-YOUR_APP_URL = "https://share.streamlit.io/" 
+# ★重要：ここにあなたのアプリURLを貼ってください
+YOUR_APP_URL = "https://あなたのアプリのURL.replit.app"
 
 # ==========================================
 # 🎧 ページ設定 & デザイン
@@ -77,30 +76,31 @@ with st.expander("📊 4つの分析軸と全16タイプ（クリックで開く
         """)
 
 # ==========================================
-# 🤖 API設定 (Streamlit Secrets対応)
+# 🤖 API設定（ここを自動検出に修正！）
 # ==========================================
 try:
-    # Streamlit CloudのSecrets、またはローカルの.streamlit/secrets.tomlから取得
-    if "GOOGLE_API_KEY" in st.secrets:
-        api_key = st.secrets["GOOGLE_API_KEY"]
-    else:
-        # 環境変数からの取得（バックアップ）
-        api_key = os.environ.get("GOOGLE_API_KEY")
-
+    api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        st.error("⚠️ APIキーが見つかりません。Streamlit Cloudの'Settings' > 'Secrets' に設定してください。")
+        api_key = st.secrets.get("GOOGLE_API_KEY")
+    
+    if not api_key:
+        st.error("⚠️ APIキーが見つかりません。ReplitのSecretsを設定してください。")
         st.stop()
 
     genai.configure(api_key=api_key)
 
-    # モデル自動検出ロジック
+    # ★ここが修正ポイント！使えるモデルを自動で探します
     valid_model = None
     try:
+        # 使えるモデル一覧を取得し、'generateContent'に対応しているものを探す
         for m in genai.list_models():
             if 'generateContent' in m.supported_generation_methods:
+                # 優先的に使いたいモデル名が含まれているかチェック
                 if 'gemini-1.5' in m.name:
                     valid_model = m.name
                     break
+        
+        # 1.5系が見つからなければ、最初に見つかった使えるモデルにする
         if not valid_model:
              for m in genai.list_models():
                 if 'generateContent' in m.supported_generation_methods:
@@ -109,6 +109,8 @@ try:
 
         if valid_model:
             model = genai.GenerativeModel(valid_model)
+            # 接続テスト
+            # model.generate_content("test") 
         else:
             st.error("⚠️ 使用可能なGeminiモデルが見つかりませんでした。")
             st.stop()
@@ -232,4 +234,34 @@ if submitted:
                 if color_match:
                     hex_color = color_match.group(0)
                     st.markdown(f"""
-                    <div style="background-color: {hex_color}; color: #fff; padding: 20px; border-radius: 10px; text-align: center; border: 2px solid #eee; text-shadow: 0 0 5px rgba(0,0,0
+                    <div style="background-color: {hex_color}; color: #fff; padding: 20px; border-radius: 10px; text-align: center; border: 2px solid #eee; text-shadow: 0 0 5px rgba(0,0,0,0.5); margin-bottom: 20px;">
+                        <h3 style="margin:0;">Your Soul Color</h3>
+                        <p style="margin:0; font-size: 1.2em;">{hex_color}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                # Twitterシェア機能
+                type_match = re.search(r"Type:\s*\*\*([A-Z]{4})\*\*", response.text)
+                title_match = re.search(r"『\s*(.*?)\s*』", response.text)
+                color_match_text = re.search(r"カラー名:\s*(.*)", response.text)
+
+                res_type = type_match.group(1) if type_match else "分析完了"
+                res_title = title_match.group(1) if title_match else ""
+                res_color = color_match_text.group(1).replace("*","").strip() if color_match_text else ""
+
+                share_text = f"""【Sound Persona 音楽診断】
+私のタイプ：{res_type}
+『 {res_title} 』
+魂の色：{res_color}
+
+私にとって音楽とは「{q_value}」である。
+#SoundPersona"""
+
+                share_text_encoded = urllib.parse.quote(share_text)
+                share_url_encoded = urllib.parse.quote(YOUR_APP_URL)
+                tweet_url = f"https://twitter.com/intent/tweet?text={share_text_encoded}&url={share_url_encoded}"
+
+                st.link_button("🐦 結果をX(Twitter)でポストする", tweet_url)
+
+            except Exception as e:
+                st.error(f"エラーが発生しました: {e}")
