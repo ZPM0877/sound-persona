@@ -45,7 +45,7 @@ with st.expander("📊 4つの分析軸と全16タイプ（クリックで開く
     | **M**(Mainstream) vs **U**(Underground) | 王道 ↔ 個性 |メジャーな曲か、マイナーな曲か |
     | **D**(Dark) vs **B**(Bright) | 陰 ↔ 陽 | 暗い曲か、明るい曲か |
     
-    例：**LEMD** = 歌詞重視・感情的・王道・陰
+    例：**LEMD** = 歌詞・感性・王道・陰
     """)
     
     st.markdown("---")
